@@ -9,6 +9,18 @@ DATE_FORMAT = '%Y%m%d'  # Date format is not expected to change.
 
 
 class Patient:
+    """Represents a patient who is receiving periodontic treatment.
+
+    Accepts a dictionary of strings as an argument and builds a patient object containing relevant information for a
+    patient receiving this type of treatment.
+
+    - self.mrn (MRM) is an individualized unique health assigned to each patient upon first arrival at the clinic.
+        Program does not need to handle generating or changing MRN numbers.
+    - self.first = First name
+    - self.last = Last name
+    - self.birthday = Birthday. Always represented as yyyymmdd.
+    - self.sex = Sex. Always represented in long-form as male/female.
+    - self.appointments = List of appointment objects handled by the Appointment class."""
 
     def __init__(self, patient_record):  # Accepts a dictionary of patient information.
         self.mrn = patient_record['mrn']  # MRN is a individual health number unique to each patient.
@@ -22,7 +34,10 @@ class Patient:
     def __eq__(self, other):
         """Patients are determined to be equal if their MRN numbers match.
 
-        Can compare a dictionary MRN to patient object MRN, or another Patient class."""
+        Can accept as argument:
+            - Dictionary (compares key['mrn'] to Patient object MRN).
+            - String representing an MRN.
+            - Patient object."""
 
         if type(other) is dict:
             return self.mrn == other['mrn']
@@ -33,7 +48,7 @@ class Patient:
 
     def __repr__(self):
 
-        # Create repr_ before return to eliminate '\' from string.
+        # repr_ variable created to eliminate '\' from return string.
         repr_ = f'Patient(dict(mrn: {self.mrn}, first: {self.first.title()}, last: {self.last.title()}, ' \
                f'birthday: {self.birthday}, sex: {self.sex})'
 
@@ -41,14 +56,14 @@ class Patient:
 
     def __str__(self):
 
-        # Create str_ before return to eliminate '\' from string.
+        # str_ variable created to eliminate '\' from return string.
         str_ = f'Patient: {self.first.title()} {self.last.title()}, MRN: {self.mrn}, {self.sex.title()}, ' \
                f'Birthday: {self.birthday}'
 
         return str_
 
     def to_dict(self):
-        """Return a dictionary representation of a patient excluding the patient appointments list."""
+        """Return a dictionary representation of a patient excluding self.appointments."""
 
         record = {
             'mrn': self.mrn,
@@ -62,9 +77,12 @@ class Patient:
 
 
 class _Appointment:
-    """(ABC) Appointments are either Appointments or Exams.
+    """(ABC) Appointments are either Appointments or Exams representing various Periodontal visit types.
 
-    asa represents a number from 1 - 5 indicating the general health of a patient."""
+    - self.date = Appointment date.
+    - self.asa = asa represents a number from 1 - 5 indicating the general health of a patient. Assigned during
+        appointment.
+    - self.note = Note created by Periodontist to summarize the appointment."""
 
     def __init__(self, date, asa='No ASA number.', note='No note.'):
         self.date = datetime.strptime(date, DATE_FORMAT).date()
@@ -72,6 +90,7 @@ class _Appointment:
         self.note = note
 
     def to_dict(self):
+        """Return a dictionary representation of _Appointment."""
 
         record = {
             'date': self.date.strftime(DATE_FORMAT),
@@ -84,7 +103,8 @@ class _Appointment:
 
 class PeriodicExam(_Appointment):
     """Child class of Appointment."""
-    # TODO (GS): say what a periodoc exam is in the docstring
+    # TODO (GS): say what a Periodoc exam is in the docstring
+
     def __init__(self, exam_dict):
 
         super().__init__(date=exam_dict['date'],
@@ -105,8 +125,9 @@ class PeriodicExam(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of the PeriodicExam class object and adds a
-        key/value 'appointment_type': 'PeriodicExam' for use in saving and loading."""
+        """Returns a dictionary representation of a Periodic Exam.
+
+        Adds key/value 'appointment_type': 'PeriodicExam' for use in saving and loading."""
 
         record = {
             'type': self.__class__.__name__,
@@ -118,8 +139,11 @@ class PeriodicExam(_Appointment):
         return record
 
     def to_stats_dict(self):
-        """Returns a dictionary representation of the PeriodicExam with the information needed for processing
-        statistics, leaving out notes and asa."""
+        """Returns a dictionary representation of a Periodic Exam with the information needed for processing
+        statistics.
+
+        - Adds key/value 'appointment_type': 'PeriodicExam' for use in saving and loading.
+        - Leaves out self.notes and self.asa."""
 
         record = {
             'type': self.__class__.__name__,
@@ -132,6 +156,7 @@ class PeriodicExam(_Appointment):
 class LimitedExam(_Appointment):
     """Child class of Appointment."""
     # TODO (GS) say what a Limited Exam is in the docstring.
+
     def __init__(self, exam_dict):
 
         super().__init__(date=exam_dict['date'],
@@ -168,8 +193,9 @@ class LimitedExam(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of the PeriodicExam class object and adds a
-        key/value 'appointment_type': 'PeriodicExam' for use in saving and loading."""
+        """Returns a dictionary representation of a Limited Exam.
+
+        Adds key/value 'appointment_type': 'LimitedExam' for use in saving and loading."""
 
         record = {
             'type': self.__class__.__name__,
@@ -196,8 +222,11 @@ class LimitedExam(_Appointment):
         return record
 
     def to_stats_dict(self):
-        """Returns a dictionary representation of the PeriodicExam with the information needed for processing
-        statistics, leaving out notes and asa."""
+        """Returns a dictionary representation of a Limited Exam with the information needed for processing
+        statistics.
+
+        - Adds key/value 'appointment_type': 'LimitedExam' for use in saving and loading.
+        - Leaves out self.notes and self.asa."""
 
         record = {
             'type': self.__class__.__name__,
@@ -252,8 +281,9 @@ class ComprehensiveExam(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of the ComprehensiveExam class object and adds a
-        key/value 'appointment_type': 'ComprehensiveExam' for use in saving and loading."""
+        """Returns a dictionary representation of a Limited Exam.
+
+        Adds key/value 'appointment_type': 'ComprehensiveExam' for use in saving and loading."""
 
         record = {
             'type': self.__class__.__name__,
@@ -273,8 +303,11 @@ class ComprehensiveExam(_Appointment):
         return record
 
     def to_stats_dict(self):
-        """Returns a dictionary representation of the PeriodicExam with the information needed for processing
-        statistics, leaving out notes and asa."""
+        """Returns a dictionary representation of a Comprehensive Exam with the information needed for processing
+        statistics.
+
+        - Adds key/value 'appointment_type': 'ComprehensiveExam' for use in saving and loading.
+        - Leaves out self.notes and self.asa."""
 
         record = {
             'type': self.__class__.__name__,
@@ -326,8 +359,9 @@ class Surgery(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of the Surgery class object and adds a
-        key/value 'appointment_type': 'Surgery' for use in saving and loading."""
+        """Returns a dictionary representation of a Limited Exam.
+
+        Adds key/value 'appointment_type': 'Surgery' for use in saving and loading."""
 
         exam = {
             'type': self.__class__.__name__,
@@ -349,8 +383,11 @@ class Surgery(_Appointment):
         return exam
 
     def to_stats_dict(self):
-        """Returns a dictionary representation of the PeriodicExam with the information needed for processing
-        statistics, leaving out notes and asa."""
+        """Returns a dictionary representation of a Surgery appointment the information needed for processing
+        statistics.
+
+        - Adds key/value 'appointment_type': 'Surgery' for use in saving and loading.
+        - Leaves out self.notes and self.asa."""
 
         record = {
             'type': self.__class__.__name__,
@@ -371,9 +408,11 @@ class Surgery(_Appointment):
 
 
 class Repo:
-    """Handles loading information creates a list of Patient objects each containing a list of Appointment objects.
+    """Handles loading and saving information.
 
-    self.patients is the intended way for Repo to provide loaded date to other layers."""
+    self.load() - Upon self.load(), populates self.patients as a list of patients objects and corresponding appointment
+        objects. self.patients is the way loaded information is passed to upper layers.
+    self.save() = Accepts a list of patient objects and stores that information to an external file."""
 
     # TODO (GS): remove 'records-v6.yaml'
     def __init__(self, records_path='records-v6.yaml'):
@@ -381,20 +420,20 @@ class Repo:
         self.patients = []  # List of all patients as objects.
 
     def load(self):
-        """Forms objects from stored date and populates self.patient_objects in Repo."""
+        """Populates self.patients as a list of patients objects and corresponding appointment objects."""
 
         # records is a dictionary representing all patient appointments, and includes patient and appointment data.
         records = self._get_from_yaml()
         self._load_obj(records)
 
     def _load_obj(self, records):
-        # Passes each patient record (as a dictionary) to self.new_record() where it will become a Patient and
-        # Appointment object.
+        # Passes each patient record (as a dictionary) to self.new_record() where it will become a Patient object with
+        # Patient.appointments populated with appropriate Appointment objects.
         for record in records:
-            self.add_record(record)
+            self._add_record(record)
 
     def _get_from_yaml(self):
-        # Retrieves dictionary representations of patient appointments from a .yaml.
+        # Retrieves dictionary representations of patient and appointment information from a .yaml file.
         raw_records = []
         with open('records-v6.yaml', 'r') as infile:
             records = yaml.full_load(infile)
@@ -419,7 +458,7 @@ class Repo:
         with open('records-save-test-v6.yaml', 'w') as yaml_outfile:
             yaml.dump(records, yaml_outfile)
 
-    def add_record(self, apt):
+    def _add_record(self, apt):
         """Takes a dictionary containing patient and appointment information and adds that information to the
         self.patient_obj_lst."""
 
@@ -455,7 +494,7 @@ class Application:
 
     def add_appointment(self, apt):
         """Takes a dictionary containing patient and appointment information and adds that information to the
-        self.patient_obj_lst."""
+        self.patient."""
 
         if apt['type'] == 'PeriodicExam':
             exam = PeriodicExam(apt)
@@ -603,7 +642,7 @@ class Application:
 
     def delete_patient(self, p):
         """Deletes patient.
-        
+
         Argument p can be a Patient Object, a dictionary containing a key/value for MRN, or a string of the MRN."""
 
         for patient in self.patients:
@@ -625,12 +664,22 @@ class Application:
 
         # Executes when both date arguments are provided.
         if date_1 and date_2:
-            date_1 = datetime.strptime(date_1, DATE_FORMAT).date()
-            date_2 = datetime.strptime(date_2, DATE_FORMAT).date()
+
+            # If dates are type integer, convert to type string.
+            if type(date_1) is int:
+                date_1 = str(date_1)
+            if type(date_2) is int:
+                date_2 = str(date_2)
+
+            # Convert dates to datetime objects.
+            if type(date_1) is str:
+                date_1 = datetime.strptime(date_1, DATE_FORMAT).date()
+            if type(date_2) is str:
+                date_2 = datetime.strptime(date_2, DATE_FORMAT).date()
 
             for patient in self.patients:
                 for appointment in patient.appointments:
-                    if date_1 < appointment.date < date_2:
+                    if date_1 < appointment.date < date_2:  # Isolate dates within argument date ranges.
                         apts.append(appointment.to_stats_dict())
 
         # Executes when date arguments are not provided.
@@ -705,6 +754,13 @@ class Application:
 
         return 'Patient not found.'
 
+    def today_date(self):
+        """Returns today's date as an object."""
+
+        return date.today()
+
+    # TODO (GS): ADD function to return total number of a patients visits.
+
 
 def test():
     app = Application()
@@ -722,9 +778,8 @@ def test():
     'sex': 'male'
     }
 
-    print(app.patients)
-    app.delete_patient(d)
-    print(app.patients)
+    print(app.tally_stats(20000303, 20220404))
+
 
 def main():
     test()
