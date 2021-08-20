@@ -91,6 +91,7 @@ class _Appointment:
         """Return a dictionary representation of _Appointment."""
 
         record = {
+            '_type': self.__class__.__name__,
             'date': self.date.strftime(DATE_FORMAT),
             'asa': self.asa,
             'note': self.note,
@@ -123,16 +124,17 @@ class PeriodicExam(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of a Periodic Exam.
+        """Return a dictionary representation of this PeriodicExam.
 
-        Adds key/value 'appointment_type': 'PeriodicExam' for use in saving and loading."""
+        Args:
+            None
 
-        record = {
-            'type': self.__class__.__name__,
-            'date': super().to_dict()['date'],
-            'asa': super().to_dict()['asa'],
-            'note': super().to_dict()['note']
-        }
+        Return:
+            record (dict): A dictionary of this object's attrs as keys, and their values
+        """
+
+        record = super().to_dict()
+        record.update(self.__dict__)
 
         return record
 
@@ -188,31 +190,17 @@ class LimitedExam(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of a Limited Exam.
+        """Return a dictionary representation of this LimitedExam.
 
-        Adds key/value 'appointment_type': 'LimitedExam' for use in saving and loading."""
+        Args:
+            None
 
-        record = {
-            'type': self.__class__.__name__,
-            'date': super().to_dict()['date'],
-            'asa': super().to_dict()['asa'],
-            'note': super().to_dict()['note'],
-            'abscess': self.abscess,
-            'crown_lengthening': self.crown_lengthening,
-            'cv_exam': self.cv_exam,
-            'extraction': self.extraction,
-            'frenectomy': self.frenectomy,
-            'fracture': self.fracture,
-            'implant': self.implant,
-            'oral_path': self.oral_path,
-            'periodontitis': self.periodontitis,
-            'peri_implantitis': self.peri_implantitis,
-            'postop': self.postop,
-            'return_': self.return_,
-            'recession': self.recession,
-            're_evaluation': self.re_evaluation,
-            'miscellaneous': self.miscellaneous
-        }
+        Return:
+            record (dict): A dictionary of this object's attrs as keys, and their values
+        """
+
+        record = super().to_dict()
+        record.update(self.__dict__)
 
         return record
 
@@ -273,24 +261,17 @@ class ComprehensiveExam(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of a Limited Exam.
+        """Return a dictionary representation of this ComprehensiveExam.
 
-        Adds key/value 'appointment_type': 'ComprehensiveExam' for use in saving and loading."""
+        Args:
+            None
 
-        record = {
-            'type': self.__class__.__name__,
-            'date': super().to_dict()['date'],
-            'asa': super().to_dict()['asa'],
-            'note': super().to_dict()['note'],
-            'periodontitis': self.periodontitis,
-            'executive_health': self.executive_health,
-            'recession': self.recession,
-            'hygiene': self.hygiene,
-            'return_': self.return_,
-            'oncology': self.oncology,
-            'implant': self.implant,
-            'oral_path': self.oral_path,
-        }
+        Return:
+            record (dict): A dictionary of this object's attrs as keys, and their values
+        """
+
+        record = super().to_dict()
+        record.update(self.__dict__)
 
         return record
 
@@ -348,28 +329,19 @@ class Surgery(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of a Limited Exam.
+        """Return a dictionary representation of this Surgery.
 
-        Adds key/value 'appointment_type': 'Surgery' for use in saving and loading."""
+        Args:
+            None
 
-        exam = {
-            'type': self.__class__.__name__,
-            'date': super().to_dict()['date'],
-            'asa': super().to_dict()['asa'],
-            'note': super().to_dict()['note'],
-            'biopsy': self.biopsy,
-            'extractions': self.extractions,
-            'uncovery': self.uncovery,
-            'implant': self.implant,
-            'crown_lengthening': self.crown_lengthening,
-            'soft_tissue': self.soft_tissue,
-            'perio': self.perio,
-            'miscellaneous': self.miscellaneous,
-            'sinus': self.sinus,
-            'peri_implantitis': self.peri_implantitis
-        }
+        Return:
+            record (dict): A dictionary of this object's attrs as keys, and their values
+        """
 
-        return exam
+        record = super().to_dict()
+        record.update(self.__dict__)
+
+        return record
 
     def to_stats_dict(self):
         """Returns a dictionary representation of a Surgery appointment the information needed for processing
