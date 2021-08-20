@@ -10,42 +10,39 @@ DATE_FORMAT = '%Y%m%d'  # eg 20210123
 
 
 class Patient:
-    """Represents a patient who is receiving periodontic treatment.
-
-    Accepts a dictionary of strings as an argument and builds a patient object containing relevant information for a
-    patient receiving this type of treatment.
-
-    - self.mrn (MRM) is an individualized unique health assigned to each patient upon first arrival at the clinic.
-        Program does not need to handle generating or changing MRN numbers.
-    - self.first = First name
-    - self.last = Last name
-    - self.birthday = Birthday. Always represented as yyyymmdd.
-    - self.sex = Sex. Always represented in long-form as male/female.
-    - self.appointments = List of appointment objects handled by the Appointment class."""
+    """Objects of this type represent dental patients."""
 
     def __init__(self, patient_record):  # Accepts a dictionary of patient information.
+        """(Initialization)
+
+        Args:
+             patient_record (dict): A record of patient details.  The following str keys are expected:
+                first: Patient's first name
+                last:  Patient's last name
+                birthday: Patients birthday in DATE_FORMAT; eg 20011204
+                sex: Patient's sex; must be "male" or "female"
+        """
+
         self.mrn = patient_record['mrn']  # MRN is a individual health number unique to each patient.
         self.first = patient_record['first']
         self.last = patient_record['last']
-        # Convert the birthday string to a datetime object representing birthday.
         self.birthday = datetime.strptime(patient_record['birthday'], DATE_FORMAT).date()
         self.sex = patient_record['sex']
-        self.appointments = []  # Appointment Objects.
+        self.appointments = []  # Appointment objects
 
     def __eq__(self, other):
-        """Patients are determined to be equal if their MRN numbers match.
+        """Return True if MRN numbers match, False otherwise.
 
-        Can accept as argument:
-            - Dictionary (compares key['mrn'] to Patient object MRN).
-            - String representing an MRN.
-            - Patient object."""
+        Args:
+            other (Patient): A Patient to compare with
 
-        if type(other) is dict:
-            return self.mrn == other['mrn']
-        elif type(other) is str:
-            return self.mrn == other
-        else:
-            return self.mrn == other.mrn
+        Return:
+            is_equivalent (bool): True if MRN numbers match, False otherwise
+        """
+
+        is_equivalent = self.mrn == other.mrn
+
+        return is_equivalent
 
     def __repr__(self):
 
