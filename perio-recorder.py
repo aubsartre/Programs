@@ -6,7 +6,7 @@ __version__ = '0.0.6'
 from datetime import datetime, date
 import yaml
 
-DATE_FORMAT = '%Y%m%d'  # Date format is not expected to change.
+DATE_FORMAT = '%Y%m%d'  # eg 20210123
 
 
 class Patient:
