@@ -98,6 +98,9 @@ class _Appointment:
 
         return record
 
+    def __str__(self):
+        return f'{self.__class__.__name__} on {self.date}'
+
 
 class PeriodicExam(_Appointment):
     """Child class of Appointment."""
@@ -109,9 +112,6 @@ class PeriodicExam(_Appointment):
                          asa=exam_dict.get('asa'),
                          note=exam_dict.get('note')
                          )
-
-    def __str__(self):
-        return f'Periodic Exam on {self.date}'
 
     def __eq__(self, other):
         """If other is an appointment object returns True if dates and class name are the same. If other is a date
@@ -177,9 +177,6 @@ class LimitedExam(_Appointment):
         self.recession = exam_dict.get('recession')
         self.re_evaluation = exam_dict.get('re_evaluation')
         self.miscellaneous = exam_dict.get('miscellaneous')
-
-    def __str__(self):
-        return f'Limited Exam on {self.date}'
 
     def __eq__(self, other):
         """If other is an appointment object returns True if dates and class name are the same. If other is a date
@@ -266,9 +263,6 @@ class ComprehensiveExam(_Appointment):
         self.implant = exam_dict.get('implant')
         self.oral_path = exam_dict.get('oral_path')
 
-    def __str__(self):
-        return f'Comprehensive Exam on {self.date}'
-
     def __eq__(self, other):
         """If other is an appointment object returns True if dates and class name are the same. If other is a date
         object returns true if date is the same as self.date."""
@@ -343,9 +337,6 @@ class Surgery(_Appointment):
         self.miscellaneous = exam_dict.get('miscellaneous')
         self.sinus = exam_dict.get('sinus')
         self.peri_implantitis = exam_dict.get('peri_implantitis')
-
-    def __str__(self):
-        return f'Surgery on {self.date}'
 
     def __eq__(self, other):
         """If other is an appointment object returns True if dates and class name are the same. If other is a date
