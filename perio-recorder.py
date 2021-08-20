@@ -1,50 +1,48 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 __version__ = '0.0.6'
 
 from datetime import datetime, date
 import yaml
 
-DATE_FORMAT = '%Y%m%d'  # Date format is not expected to change.
+DATE_FORMAT = '%Y%m%d'  # eg 20210123
 
 
 class Patient:
-    """Represents a patient who is receiving periodontic treatment.
-
-    Accepts a dictionary of strings as an argument and builds a patient object containing relevant information for a
-    patient receiving this type of treatment.
-
-    - self.mrn (MRM) is an individualized unique health assigned to each patient upon first arrival at the clinic.
-        Program does not need to handle generating or changing MRN numbers.
-    - self.first = First name
-    - self.last = Last name
-    - self.birthday = Birthday. Always represented as yyyymmdd.
-    - self.sex = Sex. Always represented in long-form as male/female.
-    - self.appointments = List of appointment objects handled by the Appointment class."""
+    """Objects of this type represent dental patients."""
 
     def __init__(self, patient_record):  # Accepts a dictionary of patient information.
+        """(Initialization)
+
+        Args:
+             patient_record (dict): A record of patient details.  The following str keys are expected:
+                first: Patient's first name
+                last:  Patient's last name
+                birthday: Patients birthday in DATE_FORMAT; eg 20011204
+                sex: Patient's sex; must be "male" or "female"
+        """
+
         self.mrn = patient_record['mrn']  # MRN is a individual health number unique to each patient.
         self.first = patient_record['first']
         self.last = patient_record['last']
-        # Convert the birthday string to a datetime object representing birthday.
         self.birthday = datetime.strptime(patient_record['birthday'], DATE_FORMAT).date()
         self.sex = patient_record['sex']
-        self.appointments = []  # Appointment Objects.
+        self.appointments = []  # Appointment objects
 
     def __eq__(self, other):
-        """Patients are determined to be equal if their MRN numbers match.
+        """Return True if MRN numbers match, False otherwise.
 
-        Can accept as argument:
-            - Dictionary (compares key['mrn'] to Patient object MRN).
-            - String representing an MRN.
-            - Patient object."""
+        Args:
+            other (Patient): A Patient to compare with
 
-        if type(other) is dict:
-            return self.mrn == other['mrn']
-        elif type(other) is str:
-            return self.mrn == other
-        else:
-            return self.mrn == other.mrn
+        Return:
+            is_equivalent (bool): True if MRN numbers match, False otherwise
+        """
+
+        is_equivalent = self.mrn == other.mrn
+
+        return is_equivalent
 
     def __repr__(self):
 
@@ -93,12 +91,16 @@ class _Appointment:
         """Return a dictionary representation of _Appointment."""
 
         record = {
+            '_type': self.__class__.__name__,
             'date': self.date.strftime(DATE_FORMAT),
             'asa': self.asa,
             'note': self.note,
         }
 
         return record
+
+    def __str__(self):
+        return f'{self.__class__.__name__} on {self.date}'
 
 
 class PeriodicExam(_Appointment):
@@ -112,9 +114,6 @@ class PeriodicExam(_Appointment):
                          note=exam_dict.get('note')
                          )
 
-    def __str__(self):
-        return f'Periodic Exam on {self.date}'
-
     def __eq__(self, other):
         """If other is an appointment object returns True if dates and class name are the same. If other is a date
         object returns true if date is the same as self.date."""
@@ -125,16 +124,17 @@ class PeriodicExam(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of a Periodic Exam.
+        """Return a dictionary representation of this PeriodicExam.
 
-        Adds key/value 'appointment_type': 'PeriodicExam' for use in saving and loading."""
+        Args:
+            None
 
-        record = {
-            'type': self.__class__.__name__,
-            'date': super().to_dict()['date'],
-            'asa': super().to_dict()['asa'],
-            'note': super().to_dict()['note']
-        }
+        Return:
+            record (dict): A dictionary of this object's attrs as keys, and their values
+        """
+
+        record = super().to_dict()
+        record.update(self.__dict__)
 
         return record
 
@@ -180,9 +180,6 @@ class LimitedExam(_Appointment):
         self.re_evaluation = exam_dict.get('re_evaluation')
         self.miscellaneous = exam_dict.get('miscellaneous')
 
-    def __str__(self):
-        return f'Limited Exam on {self.date}'
-
     def __eq__(self, other):
         """If other is an appointment object returns True if dates and class name are the same. If other is a date
         object returns true if date is the same as self.date."""
@@ -193,31 +190,17 @@ class LimitedExam(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of a Limited Exam.
+        """Return a dictionary representation of this LimitedExam.
 
-        Adds key/value 'appointment_type': 'LimitedExam' for use in saving and loading."""
+        Args:
+            None
 
-        record = {
-            'type': self.__class__.__name__,
-            'date': super().to_dict()['date'],
-            'asa': super().to_dict()['asa'],
-            'note': super().to_dict()['note'],
-            'abscess': self.abscess,
-            'crown_lengthening': self.crown_lengthening,
-            'cv_exam': self.cv_exam,
-            'extraction': self.extraction,
-            'frenectomy': self.frenectomy,
-            'fracture': self.fracture,
-            'implant': self.implant,
-            'oral_path': self.oral_path,
-            'periodontitis': self.periodontitis,
-            'peri_implantitis': self.peri_implantitis,
-            'postop': self.postop,
-            'return_': self.return_,
-            'recession': self.recession,
-            're_evaluation': self.re_evaluation,
-            'miscellaneous': self.miscellaneous
-        }
+        Return:
+            record (dict): A dictionary of this object's attrs as keys, and their values
+        """
+
+        record = super().to_dict()
+        record.update(self.__dict__)
 
         return record
 
@@ -268,9 +251,6 @@ class ComprehensiveExam(_Appointment):
         self.implant = exam_dict.get('implant')
         self.oral_path = exam_dict.get('oral_path')
 
-    def __str__(self):
-        return f'Comprehensive Exam on {self.date}'
-
     def __eq__(self, other):
         """If other is an appointment object returns True if dates and class name are the same. If other is a date
         object returns true if date is the same as self.date."""
@@ -281,24 +261,17 @@ class ComprehensiveExam(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of a Limited Exam.
+        """Return a dictionary representation of this ComprehensiveExam.
 
-        Adds key/value 'appointment_type': 'ComprehensiveExam' for use in saving and loading."""
+        Args:
+            None
 
-        record = {
-            'type': self.__class__.__name__,
-            'date': super().to_dict()['date'],
-            'asa': super().to_dict()['asa'],
-            'note': super().to_dict()['note'],
-            'periodontitis': self.periodontitis,
-            'executive_health': self.executive_health,
-            'recession': self.recession,
-            'hygiene': self.hygiene,
-            'return_': self.return_,
-            'oncology': self.oncology,
-            'implant': self.implant,
-            'oral_path': self.oral_path,
-        }
+        Return:
+            record (dict): A dictionary of this object's attrs as keys, and their values
+        """
+
+        record = super().to_dict()
+        record.update(self.__dict__)
 
         return record
 
@@ -346,9 +319,6 @@ class Surgery(_Appointment):
         self.sinus = exam_dict.get('sinus')
         self.peri_implantitis = exam_dict.get('peri_implantitis')
 
-    def __str__(self):
-        return f'Surgery on {self.date}'
-
     def __eq__(self, other):
         """If other is an appointment object returns True if dates and class name are the same. If other is a date
         object returns true if date is the same as self.date."""
@@ -359,28 +329,19 @@ class Surgery(_Appointment):
         return self.date == other.date and self.__class__.__name__ == other.__class__.__name__
 
     def to_dict(self):
-        """Returns a dictionary representation of a Limited Exam.
+        """Return a dictionary representation of this Surgery.
 
-        Adds key/value 'appointment_type': 'Surgery' for use in saving and loading."""
+        Args:
+            None
 
-        exam = {
-            'type': self.__class__.__name__,
-            'date': super().to_dict()['date'],
-            'asa': super().to_dict()['asa'],
-            'note': super().to_dict()['note'],
-            'biopsy': self.biopsy,
-            'extractions': self.extractions,
-            'uncovery': self.uncovery,
-            'implant': self.implant,
-            'crown_lengthening': self.crown_lengthening,
-            'soft_tissue': self.soft_tissue,
-            'perio': self.perio,
-            'miscellaneous': self.miscellaneous,
-            'sinus': self.sinus,
-            'peri_implantitis': self.peri_implantitis
-        }
+        Return:
+            record (dict): A dictionary of this object's attrs as keys, and their values
+        """
 
-        return exam
+        record = super().to_dict()
+        record.update(self.__dict__)
+
+        return record
 
     def to_stats_dict(self):
         """Returns a dictionary representation of a Surgery appointment the information needed for processing
