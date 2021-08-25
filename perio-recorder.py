@@ -880,25 +880,38 @@ def cmd():
 
     args = parser.parse_args()
 
+    # Application.find_patient('mrn')
     if args.find:
         app = Application()
         print(app.find_patient(args.find))
+
+    # Application.today_date()
     elif args.today:
         app = Application()
         print(app.today_date())
+
+    # Application.tally_stats()
     elif args.stats:
         app = Application()
         print(app.tally_stats())
+
+    # Application.delete_patient('mrn')
     elif args.delete_patient:
         app = Application()
         print(app.delete_patient(args.delete_patient))
+
+    # Application.delete_apt('mrn', 'birthday(yyyymmdd)')
     elif args.delete_apt:
         app = Application()
         x = {'mrn': args.delete_apt[0], 'date': args.delete_apt[1]}
         print(app.delete_apt(x))
+
+    # Application.return_patient_records('mrn')
     elif args.return_records:
         app = Application()
         print(app.return_patient_records(args.return_records[0]))
+
+    # Application.modify_patient('mrn', 'first', 'last', 'birthday(yyyymmdd)', 'sex(male/female)')
     elif args.modify_patient:
         app = Application()
         x = {
