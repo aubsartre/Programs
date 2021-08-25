@@ -3,11 +3,13 @@
 
 __version__ = '0.0.7'
 
+import argparse
 import copy
-from datetime import datetime, date
 import yaml
+from datetime import datetime, date
 
-DATE_FORMAT = '%Y%m%d'  # eg 20210123
+DATE_FORMAT = '%Y%m%d'  # eg 20210123.
+RECORDS_PATH = 'records.yaml'  # Default filename for saving and loading records.
 
 
 class Patient:
@@ -81,6 +83,7 @@ class Patient:
 
         # copy.copy used so record.pop('appointments') will not change Patient object.
         record = copy.copy(self.__dict__)
+        record['birthday'] = self.birthday.strftime(DATE_FORMAT)
         record.pop('appointments')
 
         return record
@@ -111,8 +114,9 @@ class _Appointment:
             record (dict): A dictionary of this object's attrs as keys, and their values
         """
 
-        record = copy.copy(self.__dict__)
+        record = self.__dict__
         record['date'] = self.date.strftime(DATE_FORMAT)
+        record['_type'] = self.__class__.__name__
 
         return record
 
@@ -406,7 +410,7 @@ class Surgery(_Appointment):
 class Repo:
 
     # TODO (GS): remove 'records-v6.yaml'
-    def __init__(self, records_path='records-v6.yaml'):
+    def __init__(self, records_path='records.yaml'):
         """(Initialization)
 
         Args:
@@ -443,7 +447,7 @@ class Repo:
     def _get_from_yaml(self):
         # Retrieves dictionary representations of patient and appointment information from a .yaml file.
         raw_records = []
-        with open('records-v6.yaml', 'r') as infile:
+        with open(RECORDS_PATH, 'r') as infile:
             records = yaml.full_load(infile)
             for record in records:
                 raw_records.append(record)
@@ -483,8 +487,7 @@ class Repo:
         Uses self._push_to_yaml to populate self.patients with a complete list of Patient objects.
         """
 
-        # TODO (GS): change path to self.records_path
-        with open('records-save-test-v6.yaml', 'w') as yaml_outfile:
+        with open(self.records_path, 'w') as yaml_outfile:
             yaml.dump(records, yaml_outfile)
 
     def _add_record(self, apt):
@@ -861,27 +864,64 @@ class Application:
     # TODO (GS): ADD function to return total number of a patients visits.
 
 
-def test():
-    app = Application()
-    # run tests below
+def cmd():
+    parser = argparse.ArgumentParser(description='For manipulating patient records.')
+    parser.add_argument('-f', '--find', help='Patient MRN', nargs=1)
+    parser.add_argument('-t', '--today', help='Returns todays date', action='store_true')
+    parser.add_argument('-s', '--stats', help='Returns stats', action='store_true')
+    parser.add_argument('-dp', '--delete_patient', help='Patient MRN')
+    parser.add_argument('-da', '--delete_apt', help='MRN & date', nargs=2)
+    parser.add_argument('-r', '--return_records', help='MRN', nargs=1)
+    parser.add_argument('-mp', '--modify_patient', help='MRN, first, last, birthday(yyyymmdd), sex(male/female)',
+                        nargs=5)
 
-    d = {
-    '_type': 'PeriodicExam',
-    'asa': '3',
-    'birthday': '19850101',
-    'date': '20210707',
-    'first': 'shayla',
-    'mrn': '111',
-    'last': 'schaefer',
-    'note': 'Is this different.',
-    'sex': 'male'
-    }
+    # TODO (GS): add add_appointment?
+    # TODO (GS): add modify_appointment?
 
-    print(app.return_patient_records(111))
+    args = parser.parse_args()
+
+    if args.find:
+        app = Application()
+        print(app.find_patient(args.find))
+    elif args.today:
+        app = Application()
+        print(app.today_date())
+    elif args.stats:
+        app = Application()
+        print(app.tally_stats())
+    elif args.delete_patient:
+        app = Application()
+        print(app.delete_patient(args.delete_patient))
+    elif args.delete_apt:
+        app = Application()
+        x = {'mrn': args.delete_apt[0], 'date': args.delete_apt[1]}
+        print(app.delete_apt(x))
+    elif args.return_records:
+        app = Application()
+        print(app.return_patient_records(args.return_records[0]))
+    elif args.modify_patient:
+        app = Application()
+        x = {
+            'mrn': args.modify_patient[0],
+            'first': args.modify_patient[1],
+            'last': args.modify_patient[2],
+            'birthday': args.modify_patient[3],
+            'sex': args.modify_patient[4]
+            }
+        print(app.modify_patient(x))
+    else:
+        print('Oops')
 
 
 def main():
-    test()
+    #test()
+    cmd()
+
+
+def test():
+    app = Application()
+    # run tests below
+    app.delete_patient('222')
 
 
 if __name__ == '__main__':
