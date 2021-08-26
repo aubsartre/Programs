@@ -5,6 +5,7 @@ __version__ = '0.0.7'
 
 import argparse
 import copy
+import sys
 import yaml
 from datetime import datetime, date
 
@@ -864,16 +865,68 @@ class Application:
     # TODO (GS): ADD function to return total number of a patients visits.
 
 
-def cmd():
+def parse_args(argv=sys.argv):
     parser = argparse.ArgumentParser(description='For manipulating patient records.')
-    parser.add_argument('-f', '--find', help='Patient MRN', nargs=1)
-    parser.add_argument('-t', '--today', help='Returns todays date', action='store_true')
-    parser.add_argument('-s', '--stats', help='Returns stats', action='store_true')
-    parser.add_argument('-dp', '--delete_patient', help='Patient MRN')
-    parser.add_argument('-da', '--delete_apt', help='MRN & date', nargs=2)
-    parser.add_argument('-r', '--return_records', help='MRN', nargs=1)
-    parser.add_argument('-mp', '--modify_patient', help='MRN, first, last, birthday(yyyymmdd), sex(male/female)',
-                        nargs=5)
+
+    # Application.find_patient('mrn')
+    parser.add_argument('-f', '--find',
+                        help='Return patient information',
+                        nargs=1,
+                        default=False,
+                        metavar='mrn'
+                        )
+    # Application.today_date()
+    parser.add_argument('-t', '--today',
+                        help='Return todays date',
+                        action='store_true',
+                        default=False
+                        )
+    # Application.tally_stats()
+    parser.add_argument('-s', '--stats',
+                        help='Return stats for all patients',
+                        action='store_true',
+                        default=False
+                        )
+    # Application.delete_patient('mrn')
+    parser.add_argument('-dp', '--delete_patient',
+                        help='Delete specified patient',
+                        default=False,
+                        metavar='mrn'
+                        )
+    # Application.delete_apt('mrn', 'birthday(yyyymmdd)')
+    parser.add_argument('-da', '--delete_apt',
+                        help='Deletes appointment for specified patient(mrn) & appointment date(yyyymmdd)',
+                        nargs=2,
+                        default=False,
+                        metavar=('mrn', 'date')
+                        )
+    # Application.return_patient_records('mrn')
+    parser.add_argument('-r', '--return_records',
+                        help='Return records for patient.',
+                        nargs=1,
+                        default=False,
+                        metavar='mrn'
+                        )
+    # Application.modify_patient('mrn', 'first', 'last', 'birthday(yyyymmdd)', 'sex(male/female)')
+    parser.add_argument('-mp', '--modify_patient',
+                        help='Modify patient record for with inputted information. Birthday must be yyyymmdd, sex must '
+                             'be male/female.',
+                        nargs=5,
+                        default=False,
+                        metavar=('mrn', 'first', 'last', 'birthday', 'sex')
+                        )
+
+    # A Work in progress ;)
+    parser.add_argument('-a', '--add_appointment',
+                        help='Add patient appointment. Requires patient mrn, and appointment attributes. If appointment'
+                             'note is included each word in the note must be separated with an underscore(_) rather '
+                             'than a space. Required attributes for every appointment: MRN, Type(PeriodicExam, '
+                             'ComprehensiveExam, LimitedExam, Surgery), Appointment Date(yyyymmdd). Optional attributes'
+                             'are specific to each appointment type: PeriodicExam(asa, notes), LimitedExam(asa, notes,'
+                             'abscess, crown_lengthening, cv_exam, extraction, frenectomy, fracture, implant, '
+                             'oral_path, periodontitis, peri_implantitis, postop, return_, recession, re_evaluation, '
+                             'miscellaneous.)'
+                        )
 
     # TODO (GS): add add_appointment?
     # TODO (GS): add modify_appointment?
@@ -883,7 +936,7 @@ def cmd():
     # Application.find_patient('mrn')
     if args.find:
         app = Application()
-        print(app.find_patient(args.find))
+        print(app.find_patient(args.find[0]))
 
     # Application.today_date()
     elif args.today:
@@ -924,11 +977,12 @@ def cmd():
         print(app.modify_patient(x))
     else:
         print('Oops')
+    # TODO (GS) Change else: 'Oops'
 
 
 def main():
     #test()
-    cmd()
+    parse_args()
 
 
 def test():
