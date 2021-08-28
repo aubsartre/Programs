@@ -488,7 +488,7 @@ class Repo:
         Uses self._push_to_yaml to populate self.patients with a complete list of Patient objects.
         """
 
-        with open(self.records_path, 'w') as yaml_outfile:
+        with open('savetext.yaml', 'w') as yaml_outfile:
             yaml.dump(records, yaml_outfile)
 
     def _add_record(self, apt):
@@ -866,6 +866,14 @@ class Application:
 
 
 def parse_args(argv=sys.argv):
+    """For operating program from the terminal.
+
+    Args:
+        Dependant on request.
+    Return:
+        dependant on request.
+    """
+
     parser = argparse.ArgumentParser(description='For manipulating patient records.')
 
     # Application.find_patient('mrn')
@@ -915,23 +923,32 @@ def parse_args(argv=sys.argv):
                         default=False,
                         metavar=('mrn', 'first', 'last', 'birthday', 'sex')
                         )
-
-    # A Work in progress ;)
+    # Application.add_appointment('mrn', '_type', 'DATE:yyyymmdd', 'optional attributes specific to appointment types')
     parser.add_argument('-a', '--add_appointment',
-                        help='Add patient appointment. Requires patient mrn, and appointment attributes. If appointment'
-                             'note is included each word in the note must be separated with an underscore(_) rather '
-                             'than a space. Required attributes for every appointment: MRN, Type(PeriodicExam, '
-                             'ComprehensiveExam, LimitedExam, Surgery), Appointment Date(yyyymmdd). Optional attributes'
-                             'are specific to each appointment type: PeriodicExam(asa, notes), LimitedExam(asa, notes,'
-                             'abscess, crown_lengthening, cv_exam, extraction, frenectomy, fracture, implant, '
-                             'oral_path, periodontitis, peri_implantitis, postop, return_, recession, re_evaluation, '
-                             'miscellaneous.)'
+                        help='Add patient appointment. Requires patient mrn, appointment date, appointment type, '
+                             'followed by appointment attributes. If appointment note is included it must start with '
+                             '(NOTE:), and each word in the note must be separated with a ( - ) rather than a space. '
+                             'If asa is included the asa number must be immediatly preceded by (ASA:). Example(ASA:5). '
+                             'Required attributes for every appointment: MRN, Type(PeriodicExam, ComprehensiveExam, '
+                             'LimitedExam, Surgery), Appointment Date(DATE:yyyymmdd). Appointment date must be '
+                             'immediatly preceded by (DATE:). Optional attributes are specific to each appointment '
+                             'type: PeriodicExam(asa, note), LimitedExam(asa, note, abscess, crown_lengthening, '
+                             'cv_exam, extraction, frenectomy, fracture, implant, oral_path, periodontitis, '
+                             'peri_implantitis, postop, return_, recession, re_evaluation, miscellaneous.) '
+                             'ComprehensiveExam(asa, note, periodontitis, executive_health, recession, hygiene, '
+                             'return_, oncology, implant, oral_path), Surgery(asa, note, biopsy, extractions, '
+                             'uncovery, implant, crown_lengthening, soft_tissue, perio, miscellaneous, sinus, '
+                             'peri_implantitis). Input example (mrn, apt_attribute1, apt_attribute2, apt_attribute3, '
+                             'this-is-the-apt-note).',
+                        default=False,
+
+                        # All cmd arguments will be collected into a list. Error message will be gathered if there is
+                        # not at least one argument.
+                        nargs='+',
+                        metavar=('mrn', 'date type')
                         )
 
-    # TODO (GS): add add_appointment?
-    # TODO (GS): add modify_appointment?
-
-    args = parser.parse_args()
+    args = parser.parse_args()  # Collect arguments.
 
     # Application.find_patient('mrn')
     if args.find:
@@ -974,10 +991,96 @@ def parse_args(argv=sys.argv):
             'birthday': args.modify_patient[3],
             'sex': args.modify_patient[4]
             }
-        print(app.modify_patient(x))
+
+    # Application.add_appointment(dict{patient & appointment attributes})
+    elif args.add_appointment:
+        app = Application()
+        mrn = args.add_appointment[0]
+        if not mrn.isdecimal():
+            print(f'mrn must be all numerical digits. Provided mrn: {mrn}')
+            return
+
+        patient = app.find_patient(mrn)  # Get patient object with mrn.
+        patient_dict = {
+            'mrn': patient.mrn,
+            'first': patient.first,
+            'last': patient.last,
+            'birthday': patient.birthday.strftime(DATE_FORMAT),
+            'sex': patient.sex
+        }
+
+        apt_dict = {}
+        apt_args = args.add_appointment[1:]
+
+        # Deal with possible patient note. A note must be preceded with 'NOTE:', and each word must be separated with
+        # '-' rather than ' '.
+        note = None
+        for attribute in apt_args:
+            if attribute[:5] == 'NOTE:':
+                note = attribute[5:]  # Remove NOTE:
+                note = note.replace('-', ' ')
+                apt_dict['note'] = note
+                apt_args.remove(attribute)
+                continue
+
+        # Deal with possible patient asa.
+        asa = None
+        for attribute in apt_args:
+            if attribute[:5] == 'ASA:'.lower():
+                asa = attribute[5:]  # Remove asa:
+                apt_dict['asa'] = asa
+                apt_args.remove(attribute)
+                continue
+
+        # Deal with appointment date.
+        date_ = None
+        for attribute in apt_args:
+            if attribute[:5] == 'DATE:':
+                date_ = attribute[5:]
+                apt_dict['date'] = date_
+                apt_args.remove(attribute)
+                continue
+        if date_ is None:
+            print('Appointment date must be included.')
+            return
+
+        # Deal with appointment type.
+        apt_dict['_type'] = None
+        for attribute in apt_args:
+            if attribute == 'PeriodicExam':
+                apt_dict['_type'] = 'PeriodicExam'
+                apt_args.remove(attribute)
+                continue
+            elif attribute == 'LimitedExam':
+                apt_dict['_type'] = 'LimitedExam'
+                apt_args.remove(attribute)
+                continue
+            elif attribute == 'ComprehensiveExam':
+                apt_dict['_type'] = 'ComprehensiveExam'
+                apt_args.remove(attribute)
+                continue
+            elif attribute == 'Surgery':
+                apt_dict['_type'] = 'Surgery'
+                apt_args.remove(attribute)
+                continue
+        if apt_dict['_type'] is None:
+            print('Appointment type must be included.')
+            return
+
+        # Populate the rest of apt_dict with remaining attributes.
+        for attribute in apt_args:
+            apt_dict[attribute] = True
+
+        return_dict = {**patient_dict, **apt_dict}
+
+        app.add_appointment(return_dict)
+        app.save()
+
+    # Used when no optional argument is provided.
     else:
-        print('Oops')
-    # TODO (GS) Change else: 'Oops'
+        print('At least one optional argument is required. Use -h to access help menu.')
+
+    # TODO (GS) add modify_appointment()
 
 
 def main():
@@ -988,7 +1091,24 @@ def main():
 def test():
     app = Application()
     # run tests below
-    app.delete_patient('222')
+
+    x = {
+        '_type': 'Surgery',
+        'asa': '2',
+        'birthday': '19830303',
+        'first': 'tom',
+        'last': 'wagar',
+        'mrn': '222',
+        'sex': 'male',
+        'biopsy': 'True',
+        'implant': 'True',
+        'sinus': 'True',
+        'note': 'Another Test',
+        'date': '20210826'
+    }
+
+    #app.add_appointment(x)
+    app.save()
 
 
 if __name__ == '__main__':
