@@ -1,0 +1,60 @@
+- _type: PeriodicExam
+  asa: '3'
+  birthday: '19850101'
+  date: '20210101'
+  first: shayla
+  last: steeds
+  mrn: '111'
+  note: this is a test.hope it works.
+  sex: female
+- _type: PeriodicExam
+  asa: '3'
+  birthday: '19850101'
+  date: '20210202'
+  first: shayla
+  last: steeds
+  mrn: '111'
+  note: this is a test.hope it works.
+  sex: female
+- _type: PeriodicExam
+  asa: '3'
+  birthday: '19850101'
+  date: '20210606'
+  first: shayla
+  last: steeds
+  mrn: '111'
+  note: this is a test.hope it works.
+  sex: female
+- _type: PeriodicExam
+  asa: '3'
+  birthday: '19850101'
+  date: '20210707'
+  first: shayla
+  last: steeds
+  mrn: '111'
+  note: this is a test.hope it works.
+  sex: female
+- _type: LimitedExam
+  abscess: null
+  asa: '3'
+  birthday: '19830303'
+  crown_lengthening: null
+  cv_exam: 'yes'
+  date: '20210303'
+  extraction: null
+  first: tom
+  fracture: true
+  frenectomy: null
+  implant: null
+  last: wagar
+  miscellaneous: null
+  mrn: '222'
+  note: this is a test.hope it works.
+  oral_path: null
+  peri_implantitis: null
+  periodontitis: null
+  postop: null
+  re_evaluation: null
+  recession: null
+  return_: null
+  sex: male
