@@ -2,9 +2,23 @@
 # -*- coding: utf-8 -*-
 
 from core import Patient, LimitedExam, PeriodicExam, ComprehensiveExam, Surgery
+import logging
 import yaml
 
 RECORDS_PATH = 'records.yaml'  # Default filename for saving and loading records.
+LOGGER_PATH = 'storage.log'  # Default filename for saving logging information for this module.
+LOGGING_LEVEL = logging.DEBUG  # Default logging level
+
+# Configure logging.
+logger = logging.getLogger(__name__)  # Include module name.
+logger.setLevel(LOGGING_LEVEL)  # Set logging recording leve.
+
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(message)s')
+
+file_handler = logging.FileHandler(LOGGER_PATH)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 
 class Repo:
@@ -36,6 +50,7 @@ class Repo:
         # records is a dictionary representing all patient appointments, and includes patient and appointment data.
         records = self._get_from_yaml()
         self._load_obj(records)
+        logger.debug('Program loaded')
 
     def _load_obj(self, records):
         # Passes each patient record (as a dictionary) to self.new_record() where it will become a Patient object with
@@ -50,6 +65,7 @@ class Repo:
             records = yaml.full_load(infile)
             for record in records:
                 raw_records.append(record)
+        logger.debug(f'Records pulled from {RECORDS_PATH}')
         return raw_records
 
     def save(self, patients):
@@ -64,7 +80,7 @@ class Repo:
         self.patients with a complete list of Patient objects.
         """
 
-        records = []  # List of patient objects.
+        records = []  # List of appointment dictionaries.
 
         for patient in patients:
             patient_info = patient.to_dict()
@@ -72,8 +88,12 @@ class Repo:
                 appointment_info = appointment.to_dict()
                 record = {**patient_info, **appointment_info}
                 records.append(record)
+                logger.debug(f'Patient {record["mrn"]}, appointment on date {record["date"]}, converted to dict and '
+                             f'compiled for saving')
 
         self._push_to_yaml(records)
+
+        logger.debug('Program saved')
 
     def _push_to_yaml(self, records):
         """Saves all information to a .yaml file.
@@ -88,6 +108,7 @@ class Repo:
 
         with open(RECORDS_PATH, 'w') as yaml_outfile:
             yaml.dump(records, yaml_outfile)
+        logger.debug(f'Records pushed to {RECORDS_PATH}')
 
     def _add_record(self, apt):
         """Substantiates Patient objects with relevant information and adds patient to self.patients.
@@ -109,14 +130,19 @@ class Repo:
         elif apt['_type'] == 'Surgery':
             exam = Surgery(apt)
         else:
-            raise ValueError(f'Could not load record due to missing _type: {apt}')
+            logger.critical(f'Could not load record due to missing _type')
 
         if len(self.patients) > 0:
             for patient in self.patients:
                 if patient == apt:
                     patient.appointments.append(exam)
+                    logger.debug(
+                        f'Patient {apt["mrn"]}, appointment date {apt["date"]}, substantiated as object and added to '
+                        f'self.patients')
                     return
 
         new_patient = Patient(apt)
         new_patient.appointments.append(exam)
         self.patients.append(new_patient)
+        logger.debug(f'Patient {apt["mrn"]}, appointment date {apt["date"]}, substantiated as object and added to '
+                     f'self.patients')
