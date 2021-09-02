@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-__version__ = '0.0.8'
-
 import copy
 from datetime import datetime, date
 
 DATE_FORMAT = '%Y%m%d'  # eg 20210123.
+
 
 class Patient:
     """Objects of this type represent periodontal patients."""
@@ -102,7 +101,7 @@ class _Appointment:
         self.note = note
 
     def to_dict(self):
-        """Return a copy of a dictionary representation of this appointment.
+        """Return a dictionary representation of this appointment.
 
         Args:
             None
@@ -113,6 +112,23 @@ class _Appointment:
         record = self.__dict__
         record['date'] = self.date.strftime(DATE_FORMAT)
         record['_type'] = self.__class__.__name__
+
+        return record
+
+    def to_stats_dict(self):
+        """Returns a copy of a dictionary representation of this Appointment with only the information needed for
+        processing statistics.
+
+        Args:
+            None
+        Return:
+            record (dict): A dictionary copy of this object's attrs as keys, and their values, excluding self.note and
+            self.asa.
+        """
+
+        record = copy.copy(self.to_dict())  # Copy dictionary so manipulation will not affect the instance.
+        record.pop('note')
+        record.pop('asa')
 
         return record
 
@@ -162,24 +178,6 @@ class PeriodicExam(_Appointment):
         record = super().to_dict()
         record.update(self.__dict__)
         record = copy.copy(record)
-
-        return record
-
-    def to_stats_dict(self):
-        """Returns a dictionary representation of this PeriodicExam with only the information needed for processing
-        statistics.
-
-        Args:
-            None
-        Return:
-            record (dict): A dictionary copy of this object's attrs as keys, and their values, excluding self.note and
-            self.asa.
-        """
-        record = super().to_dict()
-        record.update(self.__dict__)
-        record = copy.copy(record)  # copy.copy used so manipulating the dictionary will not the affect the instance.
-        record.pop('note')
-        record.pop('asa')
 
         return record
 
@@ -244,27 +242,10 @@ class LimitedExam(_Appointment):
 
         return record
 
-    def to_stats_dict(self):
-        """Returns a dictionary representation of this LimitedExam with only the information needed for processing
-        statistics.
-
-        Args:
-            None
-        Return:
-            record (dict): A dictionary copy of this object's attrs as keys, and their values, excluding self.note and
-            self.asa.
-        """
-
-        record = self.to_dict()
-        record.pop('note')
-        record.pop('asa')
-
-        return record
-
 
 class ComprehensiveExam(_Appointment):
     """Child class of Appointment."""
-
+    # TODO (GS): Say what a Comprehensive Exam is
     def __init__(self, exam_dict):
         super().__init__(date_=exam_dict['date'],
                          asa=exam_dict.get('asa'),
@@ -309,23 +290,6 @@ class ComprehensiveExam(_Appointment):
         record = super().to_dict()
         record.update(self.__dict__)
         record = copy.copy(record)
-
-        return record
-
-    def to_stats_dict(self):
-        """Returns a dictionary representation of this ComprehensiveExam with only the information needed for processing
-        statistics.
-
-        Args:
-            None
-        Return:
-            record (dict): A dictionary copy of this object's attrs as keys, and their values, excluding self.note and
-            self.asa.
-        """
-
-        record = self.to_dict()
-        record.pop('note')
-        record.pop('asa')
 
         return record
 
@@ -380,22 +344,5 @@ class Surgery(_Appointment):
         record = super().to_dict()
         record.update(self.__dict__)
         record = copy.copy(record)
-
-        return record
-
-    def to_stats_dict(self):
-        """Returns a dictionary representation of this Surgery appointment with only the information needed for
-        processing statistics.
-
-        Args:
-            None
-        Return:
-            record (dict): A dictionary copy of this object's attrs as keys, and their values, excluding self.note and
-            self.asa.
-        """
-
-        record = self.to_dict()
-        record.pop('note')
-        record.pop('asa')
 
         return record
