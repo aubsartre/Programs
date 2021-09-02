@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-__version__ = '0.0.8'
-
-from core2 import Patient, LimitedExam, PeriodicExam, ComprehensiveExam, Surgery
+from core import Patient, LimitedExam, PeriodicExam, ComprehensiveExam, Surgery
 import yaml
 
 RECORDS_PATH = 'records.yaml'  # Default filename for saving and loading records.
@@ -11,8 +9,7 @@ RECORDS_PATH = 'records.yaml'  # Default filename for saving and loading records
 
 class Repo:
 
-    # TODO (GS): remove 'records-v6.yaml'
-    def __init__(self, records_path='records.yaml'):
+    def __init__(self, records_path=RECORDS_PATH):
         """(Initialization)
 
         Args:
@@ -89,7 +86,7 @@ class Repo:
         Uses self._push_to_yaml to populate self.patients with a complete list of Patient objects.
         """
 
-        with open('savetext.yaml', 'w') as yaml_outfile:
+        with open(RECORDS_PATH, 'w') as yaml_outfile:
             yaml.dump(records, yaml_outfile)
 
     def _add_record(self, apt):
