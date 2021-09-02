@@ -1,39 +1,3 @@
-- _type: PeriodicExam
-  asa: '3'
-  birthday: '19850101'
-  date: '20210101'
-  first: shayla
-  last: steeds
-  mrn: '111'
-  note: this is a test.hope it works.
-  sex: female
-- _type: PeriodicExam
-  asa: '3'
-  birthday: '19850101'
-  date: '20210202'
-  first: shayla
-  last: steeds
-  mrn: '111'
-  note: this is a test.hope it works.
-  sex: female
-- _type: PeriodicExam
-  asa: '3'
-  birthday: '19850101'
-  date: '20210606'
-  first: shayla
-  last: steeds
-  mrn: '111'
-  note: this is a test.hope it works.
-  sex: female
-- _type: PeriodicExam
-  asa: '3'
-  birthday: '19850101'
-  date: '20210707'
-  first: shayla
-  last: steeds
-  mrn: '111'
-  note: this is a test.hope it works.
-  sex: female
 - _type: LimitedExam
   abscess: null
   asa: '3'
@@ -58,3 +22,58 @@
   recession: null
   return_: null
   sex: male
+- _type: PeriodicExam
+  asa: '3'
+  birthday: '19850801'
+  date: '20210101'
+  first: shayla
+  last: steeds
+  mrn: '111'
+  note: this is a test.hope it works.
+  sex: female
+- _type: PeriodicExam
+  asa: '3'
+  birthday: '19850801'
+  date: '20210202'
+  first: shayla
+  last: steeds
+  mrn: '111'
+  note: this is a test.hope it works.
+  sex: female
+- _type: PeriodicExam
+  asa: '3'
+  birthday: '19850801'
+  date: '20210606'
+  first: shayla
+  last: steeds
+  mrn: '111'
+  note: this is a test.hope it works.
+  sex: female
+- _type: PeriodicExam
+  asa: '3'
+  birthday: '19850801'
+  date: '20210707'
+  first: shayla
+  last: steeds
+  mrn: '111'
+  note: this is a test.hope it works.
+  sex: female
+- _type: Surgery
+  asa: null
+  biopsy: null
+  birthday: '19850801'
+  crown_lengthening: true
+  date: '20211111'
+  extractions: null
+  first: shayla
+  implant: null
+  last: steeds
+  miscellaneous: null
+  mrn: '111'
+  note: test test test
+  peri_implantitis: true
+  perio: true
+  sex: female
+  sinus: null
+  soft_tissue: true
+  uncovery: null
