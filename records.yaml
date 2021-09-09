@@ -22,12 +22,107 @@
   recession: null
   return_: null
   sex: male
+- _type: Surgery
+  asa: '2'
+  biopsy: 'True'
+  birthday: '19830303'
+  crown_lengthening: null
+  date: '20210909'
+  extractions: null
+  first: tom
+  implant: 'True'
+  last: wagar
+  miscellaneous: null
+  mrn: '222'
+  note: Another Test
+  peri_implantitis: null
+  perio: null
+  sex: male
+  sinus: 'True'
+  soft_tissue: null
+  uncovery: null
+- _type: Surgery
+  asa: '2'
+  biopsy: 'True'
+  birthday: '19830303'
+  crown_lengthening: null
+  date: '20210909'
+  extractions: null
+  first: tom
+  implant: 'True'
+  last: wagar
+  miscellaneous: null
+  mrn: '222'
+  note: Another Test
+  peri_implantitis: null
+  perio: null
+  sex: male
+  sinus: 'True'
+  soft_tissue: null
+  uncovery: null
+- _type: Surgery
+  asa: '2'
+  biopsy: 'True'
+  birthday: '19830303'
+  crown_lengthening: null
+  date: '20210909'
+  extractions: null
+  first: tom
+  implant: 'True'
+  last: wagar
+  miscellaneous: null
+  mrn: '222'
+  note: Another Test
+  peri_implantitis: null
+  perio: null
+  sex: male
+  sinus: 'True'
+  soft_tissue: null
+  uncovery: null
+- _type: Surgery
+  asa: '2'
+  biopsy: 'True'
+  birthday: '19830303'
+  crown_lengthening: null
+  date: '20210909'
+  extractions: null
+  first: tom
+  implant: 'True'
+  last: wagar
+  miscellaneous: null
+  mrn: '222'
+  note: Another Test
+  peri_implantitis: null
+  perio: null
+  sex: male
+  sinus: 'True'
+  soft_tissue: null
+  uncovery: null
+- _type: Surgery
+  asa: '2'
+  biopsy: 'True'
+  birthday: '19830303'
+  crown_lengthening: null
+  date: '20210909'
+  extractions: null
+  first: tom
+  implant: 'True'
+  last: wagar
+  miscellaneous: null
+  mrn: '222'
+  note: Another Test
+  peri_implantitis: null
+  perio: null
+  sex: male
+  sinus: 'True'
+  soft_tissue: null
+  uncovery: null
 - _type: PeriodicExam
   asa: '3'
   birthday: '19850801'
   date: '20210101'
   first: shayla
-  last: steeds
+  last: schaefer
   mrn: '111'
   note: this is a test.hope it works.
   sex: female
@@ -36,7 +131,7 @@
   birthday: '19850801'
   date: '20210202'
   first: shayla
-  last: steeds
+  last: schaefer
   mrn: '111'
   note: this is a test.hope it works.
   sex: female
@@ -45,7 +140,7 @@
   birthday: '19850801'
   date: '20210606'
   first: shayla
-  last: steeds
+  last: schaefer
   mrn: '111'
   note: this is a test.hope it works.
   sex: female
@@ -54,7 +149,7 @@
   birthday: '19850801'
   date: '20210707'
   first: shayla
-  last: steeds
+  last: schaefer
   mrn: '111'
   note: this is a test.hope it works.
   sex: female
@@ -67,7 +162,7 @@
   extractions: null
   first: shayla
   implant: null
-  last: steeds
+  last: schaefer
   miscellaneous: null
   mrn: '111'
   note: test test test
