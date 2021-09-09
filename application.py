@@ -586,6 +586,7 @@ def main():
     handler.setFormatter(formatter)
 
     log.addHandler(handler)
+    logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s')
 
     log.debug(f'({RUNTIME_ID}) main()')
 

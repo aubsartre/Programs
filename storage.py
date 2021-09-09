@@ -12,7 +12,7 @@ DEFAULT_LOG_LEVEL = logging.DEBUG  # Default logging level.
 
 # Configure logging.
 log = logging.getLogger(__name__)  # Include module name.
-log.setLevel(DEFAULT_LOG_LEVEL)  # Set logging recording leve.
+log.addHandler(logging.NullHandler())
 
 
 class Repo:
