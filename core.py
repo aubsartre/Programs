@@ -3,8 +3,18 @@
 
 import copy
 from datetime import datetime, date
+import logging
+from logging.handlers import RotatingFileHandler
+import uuid
 
 DATE_FORMAT = '%Y%m%d'  # eg 20210123.
+LOG_FILENAME = 'core.log'  # Default filename for saving logging information for this module.
+DEFAULT_LOG_LEVEL = logging.DEBUG  # Default logging level
+RUNTIME_ID = uuid.uuid4()  # Sets unique id for each runtime.
+
+# Configure logging.
+log = logging.getLogger(__name__)  # Include module name.
+log.setLevel(DEFAULT_LOG_LEVEL)  # Set logging recording level.
 
 
 class Patient:
@@ -28,6 +38,8 @@ class Patient:
         self.sex = patient_record['sex']
         self.appointments = []  # Appointment Objects
 
+        log.debug(f'{RUNTIME_ID} Patient(): Patient instance instantiated {self.mrn}, {self.first} {self.last}')
+
     def __eq__(self, other):
         """Return True if MRN numbers match, False otherwise.
 
@@ -39,16 +51,18 @@ class Patient:
             is_equivalent (bool): True if MRN numbers match, False otherwise
         """
 
-        # TODO (GS): compare __eq__ with code suggestion.
-        # TODO (GS): fix dict comparison.
-
         if type(other) is dict:
             is_equivalent = self.mrn == other['mrn']
+            log_other = '{} {}'.format(other['mrn'], other['first'], other['last'])
         elif type(other) is str:
             is_equivalent = self.mrn == other
+            log_other = other  # Created for logging.
         else:
             is_equivalent = self.mrn == other.mrn
+            log_other = f'{other.mrn}, {other.first} {other.last}'  # Created for logging.
 
+        log.debug(f'{RUNTIME_ID} Patient.__eq__: Patient ({self.mrn}, {self.first} {self.last}), compared with Other '
+                  f'Patient ({log_other}), equality = {is_equivalent}')
         return is_equivalent
 
     def __repr__(self):
@@ -81,6 +95,8 @@ class Patient:
         record['birthday'] = self.birthday.strftime(DATE_FORMAT)
         record.pop('appointments')
 
+        log.debug(f'{RUNTIME_ID} Patient.to_dict(): Dictionary representation created for ({self.mrn}, {self.first} '
+                  f'{self.last})')
         return record
 
 
@@ -92,13 +108,15 @@ class _Appointment:
 
         Args:
             date_ (object): datetime object.
-            asa (str): OPTIONAL. String representation of a mrn number.
+            asa (str): OPTIONAL. String representation of an mrn number.
             note (str): OPTIONAL. Appointment note.
         """
 
         self.date = datetime.strptime(date_, DATE_FORMAT).date()
         self.asa = asa  # range from 1 to 5. Identifies overall patient health.
         self.note = note
+
+        log.debug(f'{RUNTIME_ID} Appointment(): Appointment instance instantiated: {self}')
 
     def to_dict(self):
         """Return a dictionary representation of this appointment.
@@ -109,9 +127,11 @@ class _Appointment:
             record (dict): A dictionary of this object's attrs as keys, and their values
         """
 
-        record = self.__dict__
+        record = copy.copy(self.__dict__)
         record['date'] = self.date.strftime(DATE_FORMAT)
         record['_type'] = self.__class__.__name__
+
+        log.debug(f'{RUNTIME_ID} Appointment.to_dict(): ({self})')
 
         return record
 
@@ -129,6 +149,8 @@ class _Appointment:
         record = copy.copy(self.to_dict())  # Copy dictionary so manipulation will not affect the instance.
         record.pop('note')
         record.pop('asa')
+
+        log.debug(f'{RUNTIME_ID} Appointment.to_stats_dict(): ({self})')
 
         return record
 
@@ -172,12 +194,10 @@ class PeriodicExam(_Appointment):
         Args:
             None
         Return:
-            record (dict): A dictionary of this object's attrs as keys, and their values
+            record (dict): A dictionary representation of this object's attrs as keys, and their values
         """
 
         record = super().to_dict()
-        record.update(self.__dict__)
-        record = copy.copy(record)
 
         return record
 
@@ -233,12 +253,10 @@ class LimitedExam(_Appointment):
         Args:
             None
         Return:
-            record (dict): A dictionary of this object's attrs as keys, and their values
+            record (dict): A dictionary representation of this object's attrs as keys, and their values
             """
 
         record = super().to_dict()
-        record.update(self.__dict__)
-        record = copy.copy(record)
 
         return record
 
@@ -284,12 +302,10 @@ class ComprehensiveExam(_Appointment):
         Args:
             None
         Return:
-            record (dict): A dictionary of this object's attrs as keys, and their values
+            record (dict): A dictionary representation of this object's attrs as keys, and their values
         """
 
         record = super().to_dict()
-        record.update(self.__dict__)
-        record = copy.copy(record)
 
         return record
 
@@ -338,11 +354,32 @@ class Surgery(_Appointment):
         Args:
             None
         Return:
-            record (dict): A dictionary of this object's attrs as keys, and their values
+            record (dict): A dictionary representation of this object's attrs as keys, and their values
         """
 
         record = super().to_dict()
-        record.update(self.__dict__)
-        record = copy.copy(record)
 
         return record
+
+
+def main():
+
+    # Logging.
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10 ** 107, backupCount=5)
+    handler.setFormatter(formatter)
+
+    log.addHandler(handler)
+
+    # Testing.
+    self_test()
+
+
+def self_test():
+    pass
+
+
+if __name__ == '__main__':
+
+    main()
