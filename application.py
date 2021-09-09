@@ -1,13 +1,23 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 import argparse
-from core import Patient, LimitedExam, PeriodicExam, ComprehensiveExam, Surgery, DATE_FORMAT
+from core import Patient, LimitedExam, PeriodicExam, ComprehensiveExam, Surgery, DATE_FORMAT, RUNTIME_ID
 from datetime import datetime, date
+import logging
+from logging.handlers import RotatingFileHandler
 from storage import Repo
 import sys
+
+
+LOG_FILENAME = 'application.log'  # Default filename for saving logging information for this module.
+DEFAULT_LOG_LEVEL = logging.DEBUG  # Default logging level.
+
+# Configure logging.
+log = logging.getLogger(__name__)  # Include module name.
+log.setLevel(DEFAULT_LOG_LEVEL)  # Set logging recording level.
 
 
 class Application:
@@ -25,6 +35,8 @@ class Application:
         self.repo = Repo()
         self.repo.load()
         self.patients = self.repo.patients  # List of patient objects.
+
+        log.debug(f'({RUNTIME_ID}) Application() instantiated.')
 
     def add_appointment(self, apt):
         """Saves appointment information.
@@ -46,17 +58,20 @@ class Application:
         elif apt['_type'] == 'Surgery':
             exam = Surgery(apt)
         else:
-            raise ValueError(f'Could not load record due to missing _type: {apt}')
+            log.error(f'({RUNTIME_ID}) Could not load record due to missing _type: {apt}')
 
         if len(self.patients) > 0:
             for patient in self.patients:
                 if patient == apt:
                     patient.appointments.append(exam)
+                    log.debug(f'({RUNTIME_ID}) add_appointment(): {exam}')
                     return
 
         new_patient = Patient(apt)
         new_patient.appointments.append(exam)
         self.patients.append(new_patient)
+
+        log.debug(f'({RUNTIME_ID}) add_appointment(): {exam}')
 
     def save(self):
         """Saves all information.
@@ -71,6 +86,8 @@ class Application:
 
         self.repo.save(self.patients)
 
+        log.debug(f'({RUNTIME_ID}) save()')
+
     def modify_patient(self, person):
         """Saves appointment information.
 
@@ -83,7 +100,7 @@ class Application:
         """
 
         if type(person) != dict:
-            raise ValueError(f'Argument type must be a dictionary. Current type is {type(person)}.')
+            log.error(f'({RUNTIME_ID}) modify_patient(): Argument type must be a dictionary. Current type is {type(person)}.')
 
         for patient in self.patients:
             if patient == person:
@@ -105,9 +122,10 @@ class Application:
                 self.patients.remove(patient)
                 self.patients.append(person)
 
-                return f'The following changes have been made. {before} has been changed to {after}.'
+                log.debug(f'({RUNTIME_ID}) modify_patient() has made the following changes have been made. {before} '
+                          f'has been changed to {after}.')
 
-        return 'Patient not found.'
+        log.debug(f'({RUNTIME_ID}) modify_patient(): Patient not found.')
 
     def modify_appointment(self, apt):
         """Changes an appointments information.
@@ -129,7 +147,7 @@ class Application:
         elif apt['_type'] == 'Surgery':
             exam = Surgery(apt)
         else:
-            raise ValueError(f'Could not load record due to missing type: {apt}')
+            log.error(f'({RUNTIME_ID}) modify_appointment(): Could not load record due to missing type: {apt}')
 
         if len(self.patients) > 0:
             for patient in self.patients:
@@ -141,7 +159,7 @@ class Application:
                             patient.appointments.append(exam)
                             return f'{patient} appointment on {exam.date} has been updated.'
 
-        return 'Patient not found.'
+        log.error(f'({RUNTIME_ID}) modify_appointment(): Patient not found.')
 
     def return_patient_records(self, mrn):
         """Returns a dictionary of Patient attributes as well as a list of dictionaries containing specific
@@ -151,14 +169,18 @@ class Application:
             mrn (str): A string containing a representation of a patients mrn number.
             mrn (int): An integer representing a patients mrn number.
         Return:
-            Dictionary of patient information including appointments.
+            patient_info (dict): Patient information.
+            apt_records (list): List of dictionaries consisting of appointment information for patient.
         """
+
+        log.debug(f'({RUNTIME_ID}) return_patient_records(mrn): {mrn}')
 
         if type(mrn) is int:  # Convert integer to string.
             mrn = str(mrn)
 
         if type(mrn) is not str:
-            raise ValueError(f'Argument type must be a string or integer. Current type is {type(mrn)}.')
+            log.error(f'({RUNTIME_ID}) return_patient_records(): Argument type must be a string or integer. Current '
+                      f'type is {type(mrn)}.')
 
         patient_info = None
         apt_records = []
@@ -176,12 +198,15 @@ class Application:
                 if len(apt_records) > 1:
                     apt_records.sort(key=lambda x: x['date'], reverse=True)
                 break
-
+#
         if patient_info:
+            log.debug('({}) return_patient_records(): Returning records for ({}, {} {})'
+                      .format(RUNTIME_ID, patient_info['mrn'], patient_info['first'], patient_info['last']))
+
             return patient_info, apt_records
 
         else:
-            return 'Patient not found. Check MRN.'
+            log.error(f'({RUNTIME_ID}) Patient not found. Check MRN.')
 
     def delete_apt(self, apt):
         """Deletes appointment.
@@ -201,10 +226,11 @@ class Application:
                 for appointment in patient.appointments:
                     if appointment == date_:
                         patient.appointments.remove(appointment)
-                        return f'Appointment on {date_} for {patient.first.title()} {patient.last.title()} has been ' \
-                               f'deleted.'
+                        log.debug(f'({RUNTIME_ID}) delete_apt(): Appointment on {date_} for {patient.first.title()} '
+                                  f'{patient.last.title()} has been deleted.')
+                        return
 
-        return f'Appointment on not found.'
+        log.error(f'({RUNTIME_ID}) delete_apt({apt}): Appointment not found.')
 
     def delete_patient(self, p):
         """Deletes patient.
@@ -220,9 +246,9 @@ class Application:
         for patient in self.patients:
             if patient == p:
                 self.patients.remove(patient)
-                return f'{patient} has been deleted!'
+                log.debug(f'({RUNTIME_ID}) delete_patient(): {patient} has been deleted!')
 
-        return f'{p} has NOT been deleted! The patient cannot be found!'
+        log.error(f'({RUNTIME_ID}) delete_patient(): {p} has NOT been deleted! The patient cannot be found!')
 
     def tally_stats(self, date_1=None, date_2=None):
         """Returns totals of relevant appointments information for each _Appointment subclass for all Patients.
@@ -234,7 +260,7 @@ class Application:
             List of dictionaries containing procedure totals for each _Appointment subclass.
         """
 
-        # TODO (GS) is this method too long?
+        log.debug(f'({RUNTIME_ID}) tally_stats({date_1}, {date_2})')
 
         apts = []  # Dictionary of appointment stats for each _Appointment subclass.
 
@@ -263,8 +289,6 @@ class Application:
             for patient in self.patients:
                 for appointment in patient.appointments:
                     apts.append(appointment.to_stats_dict())
-
-        # TODO (GS): reduce abstraction leak within this method.
 
         periodic = {'PeriodicExam': 0}
         limited = {'LimitedExam': 0}
@@ -311,6 +335,8 @@ class Application:
 
         stats = [periodic, limited, comprehensive, surgery]
 
+        log.debug(f'({RUNTIME_ID}) tally_stats() Return: {stats}')
+
         return stats
 
     def find_patient(self, mrn):
@@ -327,13 +353,15 @@ class Application:
             mrn = str(mrn)
 
         if type(mrn) is not str:
-            raise ValueError(f'Argument type must be a string or integer. Current type is {type(mrn)}.')
+            log.error(f'({RUNTIME_ID}) find_patient({mrn}): Argument type must be a string or integer. Current type '
+                      f'is {type(mrn)}.')
 
         for patient in self.patients:
             if patient.mrn == mrn:
+                log.debug(f'({RUNTIME_ID}) find_patient({mrn}) Return: {patient}')
                 return patient
 
-        return 'Patient not found.'
+        log.debug(f'({RUNTIME_ID}) find_patient({mrn}): Patient not found.')
 
     def today_date(self):
         """Returns a datetime object representing today's date.
@@ -344,6 +372,7 @@ class Application:
             datetime object.
         """
 
+        log.debug(f'({RUNTIME_ID}) today_date() Return: {date.today()}')
         return date.today()
 
 
@@ -356,6 +385,8 @@ def parse_args(argv=sys.argv):
     Return:
         Dependant on request.
     """
+
+    log.debug(f'({RUNTIME_ID}) parse_args()')
 
     parser = argparse.ArgumentParser(description='For manipulating patient records.')
 
@@ -445,6 +476,8 @@ def parse_args(argv=sys.argv):
                         )
 
     args = parser.parse_args()  # Collect arguments.
+
+    log.debug(f'({RUNTIME_ID}) parse_args() Return: {args}')
     return args
 
 
@@ -460,10 +493,12 @@ def _add_mod_apt(instance, args):
     appointment attributes.
     """
 
+    log.debug(f'({RUNTIME_ID}) _add_mod_apt({instance}, {args})')
+
     mrn = args[0]
 
     if not mrn.isdecimal():
-        print(f'mrn must be all numerical digits. Provided mrn: {mrn}')
+        log.error(f'({RUNTIME_ID}) mrn must be all numerical digits. Provided mrn: {mrn}')
         return
 
     patient = Application.find_patient(instance, mrn)  # Get patient object with mrn.
@@ -507,7 +542,7 @@ def _add_mod_apt(instance, args):
             apt_args.remove(attribute)
             continue
     if date_ is None:
-        print('Appointment date must be included.')
+        log.error(f'({RUNTIME_ID}) Appointment date must be included.')
         return
 
     # Deal with appointment type.
@@ -530,7 +565,7 @@ def _add_mod_apt(instance, args):
             apt_args.remove(attribute)
             continue
     if apt_dict['_type'] is None:
-        print('Appointment type must be included.')
+        log.error(f'({RUNTIME_ID}) Appointment type must be included.')
         return
 
     # Populate the rest of apt_dict with remaining attributes.
@@ -538,15 +573,27 @@ def _add_mod_apt(instance, args):
         apt_dict[attribute] = True
 
     return_dict = {**patient_dict, **apt_dict}
+
+    log.debug(f'({RUNTIME_ID}) _add_mod_apt() Return: {return_dict}')
     return return_dict
 
 
 def main():
+    # Initialize logging.
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    # Collect inputs if program is being run directly from cmd.
+    handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10 ** 107, backupCount=5)
+    handler.setFormatter(formatter)
+
+    log.addHandler(handler)
+
+    log.debug(f'({RUNTIME_ID}) main()')
+
+    # Following 12ish lines of code and following if/else statement determine if program should execute inputs or run
+    # self testing.
+    # Check parse_args() for program inputs from cmd.
     args = parse_args()
 
-    # Discover if program received cmd inputs.
     run_args = False  # Changed to True when input is found.
     arguments = args.__dict__
     for k, v in arguments.items():
@@ -554,8 +601,11 @@ def main():
             run_args = True
             continue
 
+    # Check for possible inputs from cmd.
     # True only when inputs received from cmd.
     if run_args is True:
+
+        log.debug(f'({RUNTIME_ID}) main() determined that program IS being run from cmd')
 
         app = Application()
 
@@ -609,16 +659,19 @@ def main():
 
         # Used when no optional argument is provided.
         else:
-            print('At least one optional argument is required. Use -h to access help menu.')
+            log.error(f'({RUNTIME_ID}) At least one optional argument is required. Use -h to access help menu.')
 
         app.save()
 
     # TODO (GS): find something useful for else
     else:
-        test()
+        log.debug(f'({RUNTIME_ID}) main(): Determined that program is NOT being run from cmd')
+
+        self_test()
 
 
-def test():
+def self_test():
+    log.debug(f'({RUNTIME_ID}) test()')
     app = Application()
     # run tests below
 
@@ -634,12 +687,18 @@ def test():
         'implant': 'True',
         'sinus': 'True',
         'note': 'Another Test',
-        'date': '20210826'
+        'date': '20210909'
     }
 
     # app.add_appointment(x)
-    print(app.return_patient_records(111))
+    # print(app.return_patient_records(111))
+
+
+    app.return_patient_records(111)
+
+    app.save()
 
 
 if __name__ == '__main__':
+
     main()
